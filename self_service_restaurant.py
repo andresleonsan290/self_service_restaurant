@@ -186,6 +186,80 @@ for category in order:
 
 ## Se muestra el valor total a pagar
 print("El total a pagar es de $" + str(round(totalToPay/100) * 100) + " Por la compra de " + str(productsQuantity) + " productos")
+def convertir_a_texto(numero):
+    # Diccionario para las unidades del 0 al 9
+    unidades = {
+        0: "", 1: "uno", 2: "dos", 3: "tres", 4: "cuatro", 5: "cinco", 6: "seis",
+        7: "siete", 8: "ocho", 9: "nueve"
+    }
 
+    # Diccionario para números especiales del 11 al 19
+    especiales = {
+        11: "once", 12: "doce", 13: "trece", 14: "catorce", 15: "quince", 16: "dieciséis",
+        17: "diecisiete", 18: "dieciocho", 19: "diecinueve"
+    }
+
+    # Diccionario para las decenas (10, 20, 30, ..., 90)
+    decenas = {
+        10: "diez", 20: "veinte", 30: "treinta", 40: "cuarenta", 50: "cincuenta",
+        60: "sesenta", 70: "setenta", 80: "ochenta", 90: "noventa"
+    }
+
+    # Diccionario para las centenas (100, 200, 300, ..., 900)
+    centenas = {
+        100: "ciento", 200: "doscientos", 300: "trescientos", 400: "cuatrocientos",
+        500: "quinientos", 600: "seiscientos", 700: "setecientos", 800: "ochocientos",
+        900: "novecientos"
+    }
+
+    # Diccionario para los miles (1000, 1000000, 1000000000)
+    miles = {
+        1000: "mil", 1000000: "millónes", 1000000000: "billones"
+    }
+
+    # Función para convertir un número de hasta tres dígitos a su representación textual
+    def convertir_tres_digitos(n):
+        if n in unidades:
+            return unidades[n]
+        elif n in especiales:
+            return especiales[n]
+        elif n in decenas:
+            return decenas[n]
+        elif n in centenas:
+            return centenas[n]
+        else:
+            resultado = ""
+            if n >= 100:
+                centena = (n // 100) * 100
+                resultado += centenas[centena] + " "
+                n %= 100
+            if n >= 10:
+                decena = (n // 10) * 10
+                resultado += decenas[decena]
+                n %= 10
+            if n > 0:
+                resultado += " y " + unidades[n]
+            return resultado.strip()
+
+    if numero == 0:
+        return unidades[0]
+    elif numero < 0:
+        return "menos " + convertir_a_texto(-numero)
+    elif numero < 1000:
+        return convertir_tres_digitos(numero)
+    else:
+        for valor, nombre in miles.items():
+            if valor <= numero < valor * 1000:
+                parte_entera = numero // valor
+                parte_decimal = numero % valor
+                return convertir_a_texto(parte_entera) + " " + nombre + " " + convertir_a_texto(parte_decimal)
+# Obtener el precio total a pagar como número entero
+precio_total = round(totalToPay / 100) * 100
+
+# Convertir el precio total a texto
+precio_total_texto = convertir_a_texto(precio_total)
+
+# Mostrar el precio total en texto
+print("El total a pagar es de $" + precio_total_texto + " por la compra de " + str(productsQuantity) + " productos.")
 ## Se muestra el promedio de coste por cada producto
 print("El promedio de precio de cada producto es de $" + str(round((totalToPay / productsQuantity)/100) * 100))
