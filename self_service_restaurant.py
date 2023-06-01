@@ -34,6 +34,7 @@ pops = {
   "sprite": None, "7up": None, "uva": None, "pepsi": None, "ginger": None, "kola": None, "te": None
 }
 
+#Este diccionario se declara para ir llevando la cuenta total de la orden del usuario
 order = {}
 
 ## Se añade la función encargada de verificar si el usuario ingresó lo que debe ingresar,
@@ -51,15 +52,15 @@ def checkOrder(dict, categoryOrdersList):
   categoryOrdersList = cleanedCategoryOrdersList
   categoryOrdersListToReturn = list(categoryOrdersList)
 
-## Se recorren los índices de los productos que eligió el usuario
+  ## Se recorren los índices de los productos que eligió el usuario
   for order in categoryOrdersList:
 
-## Descartar números que no pertenecen a ningún producto
+    ## Descartar números que no pertenecen a ningún producto
     if(order < 0 or order >= len(dict.keys())):
       print("\033[1;33m"+ "El número " + str(order + 1) + " No pertenece a ningún producto" +'\033[') 
       categoryOrdersListToReturn.remove(order)
 
-## Verificar si el array resultante luego de limpiado y de filtrado contiene mínimo 2 elementos
+  ## Verificar si el array resultante luego de limpiado y de filtrado contiene mínimo 2 elementos
   if(len(categoryOrdersListToReturn) < 2):
     ## Si hay menos de 2 elementos en el array resultante, se ejecuta eso, se le pedirá al usuario nuevamente los productos y se volverá a llamar esta función de manera recursiva
     print("\033[1;36m"+ "Debes elegir mínimo dos productos, vuelve a ingresar los números correspondientes a los productos" +"\033[")
@@ -68,6 +69,7 @@ def checkOrder(dict, categoryOrdersList):
   else:
     ## Cuando hayan mínimo 2 productos seleccionados correctamente, se retornará la lista de índices de los productos de la categoría que el usuario seleccionó
     return categoryOrdersListToReturn
+
 
 ## Se define la función que añadirá al diccionario order, las ordenes que haga el usuario en cada categoría
 def addOrder(dict, categoryOrdersList, categoryName):
@@ -93,10 +95,12 @@ print("Tenemos disponibles los siguientes 🥬vegetales")
 ## Y de mostrar un listado al usuario de los vegetales disponibles
 for key in vegetables.keys():
   vegetables[key] = total_prices["vegetables"] / len(vegetables)
-#Se muestra el lstado de vegetales
+  #Se muestra el lstado de vegetales
   print("\033[1;32m"+ str(list(vegetables).index(key) + 1) + ".) " + key +'\033[')
 
 ## Se le pide al usuario qué vegetales quiere
+
+##Vegetable_orders es una lista de los elementos (En el caso ideal, los números) que ingresa el usuario
 vegetable_orders = input('Ingresa los números de los vegetables que quieres separados por un espacio, (mínimo 2)\n').strip().split(' ')
 addOrder(vegetables, vegetable_orders, "Vegetales")
   
@@ -160,32 +164,7 @@ for key in pops.keys():
 pop_orders = input('Ingresa los números de las bebidas que quieres separados por un espacio, (mínimo 2)\n').strip().split(' ')
 addOrder(pops, pop_orders, "Bebidas")
 
-###Hallar totales y promedios
-#
-#Se definen las variables usadas para el total a pagar y el total de productos a adquirir
-totalToPay = 0
-productsQuantity = 0
 
-## Se recorre el diccionario order para transportarnos entre categorías
-for category in order:
-  #Se define la variable usada para llevar la cuenta de la sumatorias de las categorías
-  categorySumatory = 0
-
-  #Se recorren los productos por cada categoría
-  for product in order[category]:
-    categorySumatory += order[category][product]
-
-  #Se muestra el total de la categoría en cuestión redondeada en las centenas
-  print("El precio total de la categoría (" + category + ") es de $" + str(round(categorySumatory/100) * 100) + " Por la compra de " + str(len(order[category])) + " " + category)
-  
-  #Se van sumando los totales de cada categoría para llegar al total de todo
-  totalToPay += categorySumatory
-
-  #Se van sumando los tamaños de las categorías para llegar a la cantidad total de productos a adquirir
-  productsQuantity += len(order[category])
-
-## Se muestra el valor total a pagar
-print("El total a pagar es de $" + str(round(totalToPay/100) * 100) + " Por la compra de " + str(productsQuantity) + " productos")
 def convertir_a_texto(numero):
     # Diccionario para las unidades del 0 al 9
     unidades = {
@@ -233,14 +212,16 @@ def convertir_a_texto(numero):
                 centena = (n // 100) * 100
                 resultado += centenas[centena] + " "
                 n %= 100
-            if n >= 10:
-                decena = (n // 10) * 10
-                resultado += decenas[decena]
-                n %= 10
-            if n > 0:
-                resultado += " y " + unidades[n]
+                if n >= 10:
+                    decena = (n // 10) * 10
+                    resultado += decenas[decena]
+                    n %= 10
+                    if n > 0:
+                      resultado += " y " + unidades[n]
+                elif  10>n>0:
+                    resultado += unidades[n]
             return resultado.strip()
-
+    # Se recorre cada agrupación de 3 dígitos verificando si son igual o mayor a miles y millones
     if numero == 0:
         return unidades[0]
     elif numero < 0:
@@ -253,13 +234,46 @@ def convertir_a_texto(numero):
                 parte_entera = numero // valor
                 parte_decimal = numero % valor
                 return convertir_a_texto(parte_entera) + " " + nombre + " " + convertir_a_texto(parte_decimal)
+
+###Hallar totales y promedios
+#
+#Se definen las variables usadas para el total a pagar y el total de productos a adquirir
+totalToPay = 0 #Cantidad de dinero total a pagar
+productsQuantity = 0 #Cantidad de productos pedidos
+
+## Se recorre el diccionario order para transportarnos entre categorías
+for category in order:
+  #Se define la variable usada para llevar la cuenta de la sumatorias de las categorías
+  categorySumatory = 0
+  categoryOrderedProducts = []
+
+  #Se recorren los productos por cada categoría
+  for product in order[category]:
+    categorySumatory += order[category][product]
+    categoryOrderedProducts.append(product)
+
+  #Se muestra el total de la categoría en cuestión redondeada en las centenas
+  print("El precio total de la categoría (" + category + ") es de $" + str(round(categorySumatory/100) * 100) + " Por la compra de " + str(len(order[category])) + " " + category)
+  print("Los productos pedidos en la categoría " + category + " Son: " + ", ".join(categoryOrderedProducts) + "\n")
+
+  #Se van sumando los totales de cada categoría para llegar al total de todo
+  totalToPay += categorySumatory
+
+  #Se van sumando los tamaños de las categorías para llegar a la cantidad total de productos a adquirir
+  productsQuantity += len(order[category])
+
+
 # Obtener el precio total a pagar como número entero
 precio_total = round(totalToPay / 100) * 100
 
 # Convertir el precio total a texto
 precio_total_texto = convertir_a_texto(precio_total)
+cantidad_total_texto = convertir_a_texto(productsQuantity)
+
+## Se muestra el valor total a pagar
+print("El total a pagar es de $" + str(round(totalToPay/100) * 100) + " Por la compra de " + str(productsQuantity) + " productos.")
 
 # Mostrar el precio total en texto
-print("El total a pagar es de $" + precio_total_texto + " por la compra de " + str(productsQuantity) + " productos.")
+print("El total a pagar es de $" + precio_total_texto + " por la compra de " + cantidad_total_texto + " productos.")
 ## Se muestra el promedio de coste por cada producto
 print("El promedio de precio de cada producto es de $" + str(round((totalToPay / productsQuantity)/100) * 100))
